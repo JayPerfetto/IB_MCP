@@ -143,7 +143,7 @@ See a quick walkthrough in [YOUTUBE](https://www.youtube.com/watch?v=PyQz_kMQ9ek
 
 ### Rebuild and restart containers
 
-Run these from the repository root (where `docker-compose.yml` lives).
+Run these from the repository root (where `docker-compose.yml` lives). If you use [just](https://github.com/casey/just) (`brew install just`), see the repo `justfile` for shortcuts such as `just up`, `just down`, `just restart-mcp`, and `just rebuild`.
 
 | Goal | Command |
 |------|---------|
