@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 
-# Copy uv files first for better caching
-COPY pyproject.toml ./
+# Copy uv files first for better caching (lockfile keeps Pydantic/FastMCP in sync)
+COPY pyproject.toml uv.lock ./
 
 
 # Copy the server code
