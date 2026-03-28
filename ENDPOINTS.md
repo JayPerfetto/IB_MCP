@@ -140,14 +140,16 @@
 
 ## Watchlists (6)
 
-| Method | Endpoint                                                | Description                                           | Status |
-|--------|---------------------------------------------------------|-------------------------------------------------------|--------|
-| `POST` | `/iserver/account/watchlist/{watchlistId}/contract`     | Adds one or more contracts to an existing watchlist.  | 🟠     |
-| `DELETE` | `/iserver/account/watchlist/{watchlistId}/contract/{conid}` | Deletes a single contract from a specific watchlist.| 🟠     |
-| `GET`  | `/iserver/account/watchlist/{watchlistId}`              | Returns a list of contracts for a specific watchlist. | 🟠     |
-| `DELETE` | `/iserver/account/watchlist/{watchlistId}`              | Deletes a specific watchlist.                         | 🟠     |
-| `GET`  | `/iserver/account/watchlists`                           | Returns a list of all watchlists for the user.        | 🟠     |
-| `POST` | `/iserver/account/{accountId}/watchlist`                | Creates a new watchlist.                              | 🟠     |
+These MCP routes proxy the [IB REST API](https://www.interactivebrokers.com/campus/ibkr-api-page/webapi-ref/) watchlist endpoints (`/iserver/watchlists`, `/iserver/watchlist`). The last two rows are **composite** helpers: IBKR has no standalone add/remove-contract calls; they GET the list, change `rows`, then `POST` the full watchlist.
+
+| Method | Endpoint | Description | Status |
+|--------|----------|-------------|--------|
+| `GET` | `/iserver/watchlists` | Lists watchlists. Optional query `SC=USER_WATCHLIST` (user-created only). Proxies `GET /iserver/watchlists`. | 🟠 |
+| `GET` | `/iserver/watchlist` | Single watchlist with instruments. Query `id=<watchlistId>`. Proxies `GET /iserver/watchlist?id=`. | 🟠 |
+| `POST` | `/iserver/watchlist` | Create/replace watchlist. JSON body: `id` (numeric string), `name`, `rows` as `[{"C":"<conid>"}, ...]` or shortcut field `conids`. Proxies `POST /iserver/watchlist`. | 🟠 |
+| `DELETE` | `/iserver/watchlist` | Delete watchlist. Query `id=<watchlistId>`. Proxies `DELETE /iserver/watchlist?id=`. | 🟠 |
+| `POST` | `/iserver/watchlist/contracts` | Add contracts: query `id`, body `{"conids":["..."]}`. Read-modify-write via `GET` + `POST /iserver/watchlist`. | 🟠 |
+| `DELETE` | `/iserver/watchlist/contracts` | Remove one contract: query `id` and `conid`. Read-modify-write via `GET` + `POST /iserver/watchlist`. | 🟠 |
 
 
 ## Status categories

@@ -43,6 +43,7 @@ For a more detailed, side-by-side breakdown, please see the [TWS vs. Web API Com
 - [Table of Contents](#table-of-contents)
 - [Overview](#overview)
 - [Docker Desktop Setup](#docker-desktop-setup)
+  - [Rebuild and restart containers](#rebuild-and-restart-containers)
   - [Limitations of Multi-Container Setup](#limitations-of-multi-container-setup)
   - [Session Management](#session-management)
 - [Future Work](#future-work)
@@ -140,7 +141,21 @@ See a quick walkthrough in [YOUTUBE](https://www.youtube.com/watch?v=PyQz_kMQ9ek
 
 4. Start the MCP in Copilot
 
+### Rebuild and restart containers
 
+Run these from the repository root (where `docker-compose.yml` lives).
+
+| Goal | Command |
+|------|---------|
+| Stop and remove containers (network kept) | `docker compose down` |
+| Restart one service (picks up bind-mounted code after process reload) | `docker compose restart mcp_server` or `docker compose restart api_gateway` |
+| Rebuild images and start (after Dockerfile or dependency changes) | `docker compose up --build -d` |
+| Force a clean image rebuild, then start | `docker compose build --no-cache && docker compose up -d` |
+| Rebuild and recreate only the MCP server | `docker compose up -d --build mcp_server` |
+
+**MCP server and live code edits:** `docker-compose.yml` bind-mounts `./mcp_server` into the `mcp_server` container. Changes under `mcp_server/routers/` are visible inside the container immediately, but the running Python process does not auto-reload. After editing routers or `fastapi_server.py`, run `docker compose restart mcp_server`.
+
+**API gateway:** Only `api_gateway/conf.yaml` is mounted from the host; gateway image code is baked into the image. If you change `api_gateway/` sources or its `Dockerfile`, run `docker compose up -d --build api_gateway` (or rebuild all services with `docker compose up --build -d`).
 
 ### Limitations of Multi-Container Setup
 
