@@ -1,0 +1,7 @@
+{
+  "mcpServers": {
+    "ib-mcp-server": {
+      "url": "http://localhost:5002/mcp"
+    }
+  }
+}
