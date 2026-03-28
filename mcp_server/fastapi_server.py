@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI
+from fastapi.routing import APIRoute
 from fastmcp import FastMCP
 from fastmcp.server.openapi import RouteMap, MCPType
 from mcp_server.config import MCP_SERVER_HOST, MCP_SERVER_PORT, MCP_TRANSPORT_PROTOCOL, FINAL_DESCRIPTION, EXCLUDED_TAGS_SET
@@ -20,10 +21,16 @@ import session
 import watchlists
 
 
+def _short_openapi_operation_id(route: APIRoute) -> str:
+    """Use handler name as operationId so MCP tool names stay short (Cursor caps server+tool at 60 chars)."""
+    return route.name
+
+
 app = FastAPI(
     title="IBKR API",
     description=FINAL_DESCRIPTION,
-    version="1.0.0"
+    version="1.0.0",
+    generate_unique_id_function=_short_openapi_operation_id,
 )
 
 app.include_router(alerts.router)
