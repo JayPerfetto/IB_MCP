@@ -26,6 +26,18 @@ from mcp_server.config import (
 logger = logging.getLogger(__name__)
 
 
+def _ensure_watchdog_logs_to_stderr() -> None:
+    """INFO lines were invisible in Docker: root logger defaults to WARNING."""
+    if logger.handlers:
+        return
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    handler.setFormatter(logging.Formatter("[session_watchdog] %(levelname)s %(message)s"))
+    logger.addHandler(handler)
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+
 def _parse_auth_payload(data: Any) -> tuple[Optional[bool], Optional[bool]]:
     """Return (connected, authenticated) from /iserver/auth/status JSON, if present."""
     if not isinstance(data, dict):
@@ -76,6 +88,7 @@ async def _post_recovery(client: httpx.AsyncClient, path: str, label: str) -> bo
 
 
 async def session_watchdog_loop() -> None:
+    _ensure_watchdog_logs_to_stderr()
     interval = max(15, SESSION_WATCHDOG_INTERVAL_SECONDS)
     cooldown = max(60, SESSION_WATCHDOG_RECOVERY_COOLDOWN_SECONDS)
     last_recovery_mono: float = 0.0

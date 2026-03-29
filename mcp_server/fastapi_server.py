@@ -1,5 +1,6 @@
 import asyncio
 from contextlib import asynccontextmanager
+from typing import Any, AsyncIterator
 
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
@@ -38,7 +39,8 @@ def _short_openapi_operation_id(route: APIRoute) -> str:
 
 
 @asynccontextmanager
-async def _app_lifespan(app: FastAPI):
+async def _mcp_lifespan(_server: Any) -> AsyncIterator[None]:
+    """FastMCP server lifespan. FastAPI's own lifespan is NOT run by FastMCP.from_fastapi (in-process ASGI only)."""
     watchdog_task: asyncio.Task[None] | None = None
     if SESSION_WATCHDOG_ENABLED:
         watchdog_task = asyncio.create_task(
@@ -59,7 +61,6 @@ app = FastAPI(
     description=FINAL_DESCRIPTION,
     version="1.0.0",
     generate_unique_id_function=_short_openapi_operation_id,
-    lifespan=_app_lifespan,
 )
 
 app.include_router(alerts.router)
@@ -86,8 +87,9 @@ if EXCLUDED_TAGS_SET:
 
 mcp = FastMCP.from_fastapi(
     app=app,
-    route_maps = route_maps_list,
-    )
+    route_maps=route_maps_list,
+    lifespan=_mcp_lifespan,
+)
 
 if __name__ == "__main__":
     mcp.run(
