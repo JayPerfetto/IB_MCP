@@ -39,6 +39,32 @@ except ValueError:
 BASE_URL = f"{GATEWAY_INTERNAL_BASE_URL}:{GATEWAY_PORT}{GATEWAY_ENDPOINT}"
 print("BASE_URL:", BASE_URL)
 
+
+def _env_bool(key: str, default: bool) -> bool:
+    v = os.environ.get(key)
+    if v is None:
+        return default
+    return v.strip().lower() in ("1", "true", "yes", "on")
+
+
+def _env_int(key: str, default: int) -> int:
+    v = os.environ.get(key)
+    if v is None or not str(v).strip():
+        return default
+    try:
+        return int(str(v).strip())
+    except ValueError:
+        print(f"Warning: {key} must be an integer; using default {default}")
+        return default
+
+
+# Background session watchdog (see mcp_server/session_watchdog.py)
+SESSION_WATCHDOG_ENABLED = _env_bool("SESSION_WATCHDOG_ENABLED", True)
+SESSION_WATCHDOG_INTERVAL_SECONDS = _env_int("SESSION_WATCHDOG_INTERVAL_SECONDS", 120)
+SESSION_WATCHDOG_RECOVERY_COOLDOWN_SECONDS = _env_int("SESSION_WATCHDOG_RECOVERY_COOLDOWN_SECONDS", 300)
+SESSION_WATCHDOG_TRY_SSODH_INIT = _env_bool("SESSION_WATCHDOG_TRY_SSODH_INIT", True)
+SESSION_WATCHDOG_TRY_REAUTHENTICATE = _env_bool("SESSION_WATCHDOG_TRY_REAUTHENTICATE", False)
+
 # Create FastAPI object description based on filters
 base_description = """
 A comprehensive FastAPI wrapper for the Interactive Brokers Web API. 

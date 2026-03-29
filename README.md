@@ -173,6 +173,8 @@ In order to prevent the session from timing out, the endpoint /tickle should be 
 
 If the brokerage session has timed out but the session is still connected to the IBKR backend, the response to /auth/status returns ‘connected’:true and ‘authenticated’:false. Calling the /iserver/auth/ssodh/init endpoint will initialize a new brokerage session.
 
+**MCP session watchdog (optional):** The MCP server can poll `/iserver/auth/status` on a timer and log when `authenticated` changes. When `connected` is true but `authenticated` is false, it can attempt recovery with `POST /iserver/auth/ssodh/init` (and optionally `POST /iserver/reauthenticate`) subject to a cooldown, so you see clear logs instead of silent tool failures. Configure with `SESSION_WATCHDOG_*` in `.env` (see `.env.example`). This does not remove IB’s need for occasional browser re-login.
+
 ## Future Work
 - Automatically generate endpoints
   - Currently the [IB REST API (2.16.0) OpenAPI specification](https://api.ibkr.com/gw/api/v3/api-docs) fails validation, and the automated router generation feature is currently failing to generate routers. You can try to validate yourself here:
